@@ -1,5 +1,6 @@
 # Trade Discovery Service
 
+
 A microservice designed to automate the discovery of trading opportunities across a large pool of assets. This service integrates with existing market-analysis and trade-manager systems to identify and rank trading opportunities.
 
 ## Features
