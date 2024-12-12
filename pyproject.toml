@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trade-discovery"
+version = "0.1.0"
+description = "Trade discovery service for identifying trading opportunities"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.104.1",
+    "uvicorn>=0.24.0",
+    "pydantic>=2.5.2",
+    "pydantic-settings>=2.0.0",
+    "prometheus-fastapi-instrumentator>=0.22.0",
+    "sqlalchemy>=2.0.23",
+    "psycopg2-binary>=2.9.9",
+    "python-dotenv>=1.0.0"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["trade_discovery"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --import-mode=importlib"
+pythonpath = ["."]

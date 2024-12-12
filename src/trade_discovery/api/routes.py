@@ -1,3 +1,6 @@
+"""
+API routes for trade discovery service.
+"""
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -49,31 +52,34 @@ async def get_asset_details(
 
 @router.post("/asset-pool")
 async def update_asset_pool(
-    assets: List[dict],
+    symbols: List[str],
     db: Session = Depends(get_db)
 ):
-    """Update the asset pool configuration"""
-    for asset_data in assets:
-        asset = AssetPool(**asset_data)
-        db.merge(asset)
+    """Update the pool of assets to monitor"""
+    # Clear existing pool
+    db.query(AssetPool).delete()
+    
+    # Add new symbols
+    for symbol in symbols:
+        asset = AssetPool(symbol=symbol, active=True)
+        db.add(asset)
+    
     db.commit()
-    return {"status": "success"}
+    return {"message": f"Updated asset pool with {len(symbols)} symbols"}
 
 @router.post("/analyze")
-async def analyze_assets(db: Session = Depends(get_db)):
-    """
-    Trigger analysis of all active assets in the pool
-    """
-    try:
-        results = await discovery_service.analyze_asset_pool(db)
-        return {
-            "status": "success",
-            "analyzed_count": len(results),
-            "timestamp": datetime.utcnow()
-        }
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e),
-            "timestamp": datetime.utcnow()
-        }
+async def analyze_assets(
+    db: Session = Depends(get_db)
+):
+    """Trigger analysis of all active assets in the pool"""
+    assets = db.query(AssetPool).filter(AssetPool.active == True).all()
+    results = []
+    
+    for asset in assets:
+        opportunity = discovery_service.analyze_asset(asset.symbol)
+        if opportunity:
+            db.add(opportunity)
+            results.append(opportunity)
+    
+    db.commit()
+    return {"analyzed": len(assets), "opportunities": len(results)}
