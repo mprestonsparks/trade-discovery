@@ -21,9 +21,3 @@ dependencies = [
 [tool.setuptools]
 package-dir = {"" = "src"}
 packages = ["trade_discovery"]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-addopts = "-v --import-mode=importlib"
-pythonpath = ["."]
