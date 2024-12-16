@@ -36,6 +36,19 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# Install NuGet provider if needed
+if (-not (Get-PackageProvider -ListAvailable -Name NuGet)) {
+    Write-Host "Installing NuGet provider..."
+    Install-PackageProvider -Name NuGet -Force -Scope CurrentUser
+}
+
+# Check and install PowerShell-yaml module
+if (-not (Get-Module -ListAvailable -Name "powershell-yaml")) {
+    Write-Host "Installing PowerShell-yaml module..."
+    Install-Module -Name powershell-yaml -Force -Scope CurrentUser -AllowClobber
+    Import-Module powershell-yaml
+}
+
 Write-Host "All prerequisites met!"
 
 # Create necessary directories if they don't exist

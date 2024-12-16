@@ -11,6 +11,8 @@ param(
     [string]$Details
 )
 
+Import-Module powershell-yaml
+
 # Load and parse DEVELOPMENT_STATUS.yaml
 $yamlPath = ".project/status/DEVELOPMENT_STATUS.yaml"
 $content = Get-Content $yamlPath -Raw
@@ -18,8 +20,10 @@ $status = ConvertFrom-Yaml $content
 
 # Update task status
 $taskFound = $false
-foreach ($task in $status.next_available_tasks) {
-    if ($task.id -eq $TaskId) {
+$task = $null
+foreach ($t in $status.next_available_tasks) {
+    if ($t.id -eq $TaskId) {
+        $task = $t
         $task.status = $NewStatus
         $taskFound = $true
         break
@@ -49,11 +53,12 @@ $status.ai_activity_log += $logEntry
 $updatedYaml = ConvertTo-Yaml $status
 Set-Content -Path $yamlPath -Value $updatedYaml
 
-# Update GitHub issue label
-$issue = $status.next_available_tasks | Where-Object { $_.id -eq $TaskId } | Select-Object -ExpandProperty github_issue
-if ($issue) {
-    gh issue edit $issue --add-label $NewStatus
-    Write-Host "https://github.com/mprestonsparks/trade-discovery/issues/$issue"
+# Update GitHub issue label if issue exists
+if ($task.github_issue) {
+    gh issue edit $task.github_issue --add-label $NewStatus
+    Write-Host "https://github.com/mprestonsparks/trade-discovery/issues/$($task.github_issue)"
+} else {
+    Write-Host "Note: No GitHub issue associated with task $TaskId"
 }
 
 Write-Host "Task $TaskId updated to status: $NewStatus"

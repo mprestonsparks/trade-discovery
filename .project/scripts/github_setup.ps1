@@ -1,6 +1,8 @@
 # GitHub integration setup script
 # Creates labels and configures project board
 
+Import-Module powershell-yaml
+
 Write-Host "Setting up GitHub integration..."
 
 # Create status labels
@@ -26,6 +28,7 @@ $yamlPath = ".project/status/DEVELOPMENT_STATUS.yaml"
 if (Test-Path $yamlPath) {
     $content = Get-Content $yamlPath -Raw
     $status = ConvertFrom-Yaml $content
+    $modified = $false
 
     foreach ($task in $status.next_available_tasks) {
         if (-not $task.github_issue) {
@@ -36,9 +39,20 @@ Status: $($task.status)
 Blocking: $($task.blocking -join ', ')
 Prerequisites met: $($task.prerequisites_met)
 "@
-            gh issue create --title $title --body $body
-            Write-Host "Created issue: $title"
+            $issueResult = gh issue create --title $title --body $body
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "Created issue: $title"
+                $issueNumber = $issueResult -replace '.+/(\d+)$','$1'
+                $task.github_issue = [int]$issueNumber
+                $modified = $true
+            }
         }
+    }
+
+    if ($modified) {
+        $updatedYaml = ConvertTo-Yaml $status
+        Set-Content -Path $yamlPath -Value $updatedYaml
+        Write-Host "Updated DEVELOPMENT_STATUS.yaml with issue numbers"
     }
 }
 
