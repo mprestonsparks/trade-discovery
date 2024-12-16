@@ -172,3 +172,12 @@ dump.rdb
 
 # Windsurf
 .windsurfrules
+
+# Project Management Files
+# Track .project directory but ignore temporary files
+!.project/
+!.project/**
+.project/**/*.log
+.project/**/*.tmp
+.project/**/__pycache__/
+.project/**/*.pyc
