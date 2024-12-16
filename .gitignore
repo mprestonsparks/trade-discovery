@@ -169,3 +169,6 @@ docker-compose.override.yml
 # Redis
 *.rdb
 dump.rdb
+
+# Windsurf
+.windsurfrules
