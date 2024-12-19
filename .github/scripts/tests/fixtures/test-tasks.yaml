@@ -1,0 +1,10 @@
+tasks:
+  - id: "task1"
+    name: "First Task"
+    depends_on: []
+  - id: "task2"
+    name: "Second Task"
+    depends_on: ["task1"]
+  - id: "task3"
+    name: "Third Task"
+    depends_on: ["task1", "task2"]

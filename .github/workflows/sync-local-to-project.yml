@@ -1,0 +1,30 @@
+name: Sync Local to Project
+
+on:
+  push:
+    paths:
+      - '.project/status/DEVELOPMENT_STATUS.yaml'
+
+jobs:
+  sync_to_project:
+    name: Sync Local to Project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install Dependencies
+        run: |
+          cd .github/scripts
+          npm ci
+          
+      - name: Sync to Project
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd .github/scripts
+          node sync/index.js

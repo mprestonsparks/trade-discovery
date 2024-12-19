@@ -1,0 +1,31 @@
+name: Test Project V2 Events
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/scripts/tests/**'
+      - '.github/workflows/test-*.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install Dependencies
+        run: |
+          cd .github/scripts
+          npm ci
+          
+      - name: Run Tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd .github/scripts
+          npm test

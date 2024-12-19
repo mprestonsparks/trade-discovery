@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  tests:
+    build:
+      context: .
+      dockerfile: tests/infrastructure/Dockerfile
+      target: js-test
+    container_name: trade-discovery-tests
+    volumes:
+      - ./tests/infrastructure:/app/tests/infrastructure
+      - /app/node_modules/
+    environment:
+      - NODE_ENV=test
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    command: npm run test:infrastructure

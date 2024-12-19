@@ -1,0 +1,9 @@
+tasks:
+  - id: "setup"
+    name: "Setup Environment"
+  - id: "build"
+    name: "Build Project"
+    depends_on: ["setup"]
+  - id: "test"
+    name: "Run Tests"
+    depends_on: ["build"]

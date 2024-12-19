@@ -1,0 +1,5 @@
+tasks:
+  - id: "task1"
+    name: "First Task"
+  - id: "task1"
+    name: "Duplicate Task"

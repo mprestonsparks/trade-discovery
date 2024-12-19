@@ -1,21 +1,40 @@
+FROM python:3.10-slim as python-base
+
+WORKDIR /app
+COPY pyproject.toml .
+
+RUN pip install --no-cache-dir .[test,dev]
+
+# Test stage for JavaScript tests
+FROM node:18-slim as js-test
+
+WORKDIR /app
+COPY tests/infrastructure/package*.json ./
+RUN npm install
+
+COPY tests/infrastructure/ tests/infrastructure/
+COPY tests/infrastructure/babel.config.js ./
+
+CMD ["npm", "run", "test:infrastructure"]
+
+# Production stage
 FROM python:3.10-slim
 
 WORKDIR /app
 
-# Copy only requirements first to leverage Docker cache
+# Copy Python dependencies from base
+COPY --from=python-base /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
+
+# Copy application code
+COPY src/ src/
 COPY pyproject.toml .
-COPY requirements.txt .
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Create non-root user
+RUN useradd -m -r -u 1000 appuser && \
+    chown -R appuser:appuser /app
 
-# Copy the rest of the application
-COPY . .
-
-# Install the package in editable mode
-RUN pip install -e .
+USER appuser
 
 EXPOSE 8084
 
-# Use the new module path
-CMD ["uvicorn", "trade_discovery.api.app:app", "--host", "0.0.0.0", "--port", "8084", "--reload"]
+CMD ["uvicorn", "trade_discovery.api.app:app", "--host", "0.0.0.0", "--port", "8084"]
