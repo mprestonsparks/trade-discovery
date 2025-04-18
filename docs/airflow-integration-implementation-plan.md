@@ -51,6 +51,27 @@ This document outlines the plan for integrating the Trade Discovery Service with
    - Provide clear mapping of Airflow DAGs to underlying functions/scripts.
    - Maintain a checklist for alignment with requirements/goals.
 
+## Implementation Strategy
+
+1.  **DAG Location:** All DAGs orchestrating `trade-discovery` tasks will reside in `airflow-hub/dags/trade-discovery/`.
+2.  **Task Execution:**
+    *   All tasks that execute code from the `trade-discovery` repository **MUST** use the `airflow.providers.docker.operators.docker.DockerOperator`.
+    *   This ensures tasks run in an isolated environment defined by the `trade-discovery` project itself.
+3.  **Docker Requirement:**
+    *   A `Dockerfile` **MUST** exist in the root of the `trade-discovery` repository.
+    *   This `Dockerfile` will define the image used by the `DockerOperator`.
+    *   It must:
+        *   Start from a suitable base image (e.g., `python:3.9-slim`).
+        *   Copy necessary `trade-discovery` application code.
+        *   Install dependencies from `trade-discovery/requirements.txt`.
+4.  **Code Interaction:**
+    *   The `DockerOperator` will typically execute a specific script or command within the container (e.g., `docker_operator = DockerOperator(task_id='discover_new_trades', image='trade-discovery:latest', command='python /app/scripts/find_opportunities.py')`).
+    *   Refactor `trade-discovery` code into callable scripts or functions that can be easily invoked by the `DockerOperator`'s command.
+5.  **Plugin Usage:** Common functionality (e.g., custom hooks shared across projects) might still reside in `airflow-hub/plugins/common/` and be used by the DAG definition, but the core `trade-discovery` logic runs within its Docker container.
+6.  **Dependencies:** All `trade-discovery` specific dependencies are managed within its own `Dockerfile` and `requirements.txt`. No `trade-discovery` specific dependencies should be added to `airflow-hub`.
+
+## Identified Tasks & DAGs
+
 ## Verification Checklist
 - [ ] All Airflow tasks are modular, callable, and documented.
 - [ ] DAGs in `airflow-hub` reference only importable code from this repo.

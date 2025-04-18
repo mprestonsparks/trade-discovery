@@ -1,16 +1,22 @@
-name: Project Board Event Trigger
+name: Project V2 Item Trigger
 
 on:
-  project_v2_item:
-    types: [created, edited, deleted]
+  issues:
+    types: [opened, edited, deleted, closed, reopened, labeled, unlabeled]
+  pull_request:
+    types: [opened, edited, closed, reopened, labeled, unlabeled]
 
 jobs:
-  log_event:
+  sync_to_project:
+    name: Sync Issue/PR to Project
     runs-on: ubuntu-latest
     steps:
-      - name: Log Event Details
+      - uses: actions/checkout@v3
+      
+      - name: Run Project V2 Sync
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Event: ${{ github.event_name }}"
-          echo "Action: ${{ github.event.action }}"
+          cd .github/scripts
+          npm ci
+          node sync/index.js

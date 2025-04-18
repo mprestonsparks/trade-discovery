@@ -1,3 +1,4 @@
-invalid_root:
-  - not_a_task: true
-  - another_invalid: false
+next_available_tasks:
+  - id: "not a number"
+    name: 123
+    status: invalid
